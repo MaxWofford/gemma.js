@@ -33,5 +33,10 @@ recognition.onresult = function(event) {
   }
 };
 
+recognition.onend = function(){
+  // Auto restart
+  recognition.start();
+}
+
 // Begin listening for speech
 recognition.start();
