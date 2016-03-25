@@ -2,7 +2,12 @@
 var socket = io();
 
 socket.on('reply', function(msg) {
-  speak(msg);
+  if (typeof message === 'object') {
+    var audio = new Audio('./sound/' + msg['audio']);
+    audio.play();
+  } else {
+    speak(msg);
+  }
 });
 
 // Initialize text to speech in browser
@@ -20,6 +25,7 @@ recognition.interimResults = false;
 
 recognition.onresult = function(event) {
   for (var i = event.resultIndex; i < event.results.length; ++i) {
+    console.log(event.results[i][0].transcript);
     if (event.results[i].isFinal) {
       var final_transcript = event.results[i][0].transcript;
     }
