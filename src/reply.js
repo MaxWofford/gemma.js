@@ -1,21 +1,7 @@
-'use strict';
-
-let App = require('koa')();
-let ServeStatic = require('koa-static');
-let Server = require('http').createServer(App.callback());
-let Io = require('socket.io')(Server);
-
-const PORT = process.env.port || 4056;
-let Options = {
-  alias: process.env.ALIAS || ["Gemma"],
-  scripts: process.env.SCRIPTS || [],
-  https: process.env.HTTPS || false
-};
-
-App.use(ServeStatic(`${__dirname}/public`));
+const EventEmitter = require('events').EventEmitter;
+const emitter = new EventEmitter();
 
 function replyTo(msg) {
-
   function hasKeywords(keywords) {
     if (typeof keywords == 'string') {
       keywords = keywords.split(' ');
@@ -40,8 +26,12 @@ function replyTo(msg) {
   if (matches(/.*(date today|day is it).*/)) {
     return new Date().toDateString();
   }
-  if (hasKeywords(`hello ${Options['alias']}`) {
+  if (hasKeywords(`hello ${Options['alias']}`)) {
     return 'Hello!';
+  }
+  if (matches(/.*(time is it|is the time).*/)) {
+    var date = new Date;
+    return `${date.getHours()}, ${date.getMinutes()}`;
   }
 
   // Default case if we don't understand the message
@@ -55,14 +45,6 @@ function replyTo(msg) {
   return notFound[Math.floor(Math.random() * notFound.length)];
 }
 
-Io.on('connection', (socket) => {
-  socket.on('message', (msg) => {
-    // This is where response logic will go
-    var reply = replyTo(msg['contents']);
-    // ^ for the time being, we'll just echo back messages
-    socket.emit('reply', reply);
-  });
+emitter.on('hear_message', (msg) => {
+  return replyTo(msg);
 });
-
-Server.listen(PORT);
-console.log(`Listening to port ${PORT}...`);
